@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import Choice from "../components/Choice";
 
 const url = "https://quizapi.io/api/v1/questions";
 
@@ -47,7 +48,7 @@ const Quiz = () => {
           });
       };
 
-      const checkAnswer = () => {
+    const checkAnswer = () => {
         // 処理しやすい形に変換
         const realAnswer = quizList
           .map((item, index) => ({
@@ -63,7 +64,7 @@ const Quiz = () => {
         setAnswered(true);
       };
     
-      const updateAnswer = (id, append) => {
+    const updateAnswer = (id, append) => {
         if (append) {
           setSelectedAnswers([...selectedAnswers, id]);
         } else {
@@ -88,12 +89,57 @@ const Quiz = () => {
     
     
 
-  return (
-    <div>
-		<h2>クイズだよ！</h2>
-		<Link to ='/'>topに戻る</Link>
-    </div>
-  );
+          if (isLoading) {
+            return (
+              <div className="progress">
+                <div className="indeterminate" />
+              </div>
+            );
+          }
+        
+          return (
+            <div style={{ marginBottom: "5em" }}>
+              <div style={{ margin: "3em 0" }}>
+                <p className="grey-text">
+                  <span>{quizzes?.category || "no category"}</span>
+                  <span> - {quizzes?.tags.map((i) => i.name + " ") || "no tags"}</span>
+                  <span> - {quizzes?.difficulty}</span>
+                </p>
+                <h5 className="container question">{quizzes?.question}</h5>
+              </div>
+              <div className="row">
+                {quizList?.map((choice, index) => {
+                  return (
+                    <Choice
+                      key={index}
+                      choice={choice.choice}
+                      isCorrect={choice.isCorrect}
+                      answered={answered}
+                      updateAnswer={updateAnswer}
+                      id={index}
+                    />
+                  );
+                })}
+              </div>
+              {answered && (
+                <div className="correctness">
+                  <h3 className="center-align">{isCorrect ? "正解！😁" : "不正解"}</h3>
+                  <p className="center-align tips">{quizzes?.tip}</p>
+                </div>
+              )}
+              <div className="center-align">
+                <button
+                  className="btn-large green"
+                  onClick={() => {
+                    answered ? fetchQuiz() : checkAnswer();
+                  }}
+                >
+                  {answered ? "次へ" : "答え合わせ"}
+                </button>
+              </div>
+            </div>
+          );
+        
 };
 
 export default Quiz;
